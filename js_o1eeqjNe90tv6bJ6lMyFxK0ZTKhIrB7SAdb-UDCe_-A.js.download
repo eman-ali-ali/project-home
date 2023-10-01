@@ -1,0 +1,2162 @@
+(function($){
+  // List of selectors
+      
+  let selectors = [
+    "a.btn",
+    "a.btn-second",
+    "a.card_link", 
+    "a.btn-abs-more",
+    "a.footer-link ",
+    "a.policy-link",
+    "a.footer-social_link",
+    ".block-collection--body a",
+    ".bg-nav-brand a"
+  ];
+  let selectorsString = selectors.join(',');
+
+
+  // event clicks
+  let currentHost = window.location.host;
+  $(selectorsString).on('click',function () {
+    let hrefValue = $(this).attr('href');
+
+    if(hrefValue === '#' || hrefValue === '') {
+      return false;
+    }
+    let click_url = decodeURIComponent($(this).prop('href'));
+    let anchor_link = this.title || this.textContent;
+    anchor_link = anchor_link.trim();
+    // user clicks on a CTA button everywhere on the website
+    window.dataLayer.push({
+      event: 'cta_click',
+      anchor_link: anchor_link,
+      click_url: click_url
+    });
+    // user clicks on an external link
+    if(currentHost !== this.host) {
+      window.dataLayer.push({
+        event: 'external_link_click',
+        anchor_link: anchor_link,
+        click_url: click_url
+      });
+    }
+
+    // event download
+    
+    if(this.hasAttribute('download')) {
+
+      let file = click_url.split('/');
+      file = (file[file.length - 1]).split('.');
+      let file_name = file[0];
+      let file_extension = file[1];
+
+      window.dataLayer.push({
+        event: 'download',
+        anchor_link: anchor_link,
+        click_url: click_url,
+        file_name: file_name,
+        file_extension: file_extension
+      });
+    }
+  });
+
+  // event social link
+  
+  $(".social-link").on('click',function () {
+    let hrefValue = $(this).attr('href');
+
+    if(hrefValue === '#' || hrefValue === '') {
+      return false;
+    }
+    let click_url = decodeURIComponent(this.href);
+    let anchor_link = this.title || this.textContent;
+    anchor_link = anchor_link.trim();
+
+    
+
+    window.dataLayer.push({
+      event: 'social_media_share',
+      anchor_link: anchor_link,
+      click_url: click_url
+    });
+  });
+
+  // menu_level_1
+  // This event fires when an user interacts with the first level of the main menu at the top of the website. 
+  
+  $('.header-mega-menu-desktop > .menu-item-list-wp > .menu-item-list > .header-menu-item-desktop > .node-title > .header-nav-link a, .second-level > .header-nav-link > a, .header-mega-menu-items > .header-mega-menu-item > .header-menu-sub-action > a').on('click',function () {
+    let click_url = decodeURIComponent(this.href);
+    let anchor_link = this.title || this.textContent;
+    window.dataLayer.push({
+      event: 'menu_level_1',
+      anchor_link: anchor_link,
+      click_url: click_url
+    });
+  });
+
+  // menu_level_2
+  // This event fires when an user interacts with the second level of the main menu at the top of the website.
+
+  $('.header-mega-menu-desktop > .menu-item-list-wp > .menu-item-list > .header-menu-item-desktop > .last-item > .header-nav-link a, .header-menu-third-level-wp .node-title a, .header-mega-menu-items > .header-mega-menu-item > a.last-item-link').on('click',function () {
+    let click_url = decodeURIComponent(this.href);
+    let anchor_link = this.title || this.textContent;
+    window.dataLayer.push({
+      event: 'menu_level_2',
+      anchor_link: anchor_link,
+      click_url: click_url
+    });
+  });
+
+  // menu_level_3
+  // This event fires when an user interacts with the third level of the main menu at the top of the website.
+
+  $('.header-menu-third-level-wp .last-item a, .header-mega-menu-items > .header-mega-menu-item > .header-menu-dropdown-list > .last-item > a').on('click',function () {
+    let click_url = decodeURIComponent(this.href);
+    let anchor_link = this.title || this.textContent;
+    window.dataLayer.push({
+      event: 'menu_level_3',
+      anchor_link: anchor_link,
+      click_url: click_url
+    });
+  });
+
+  // menu_sticky_click
+  // This events fires when an user clicks on a link in the menu sticky bar
+
+  $('.social--sticky-link').on('click', function() {
+    let target_url = decodeURIComponent(this.href);
+    let anchor_link = this.title || this.textContent;
+    window.dataLayer.push({
+      event: 'menu_sticky',
+      anchor_link: anchor_link,
+      target_url: target_url
+    });
+
+  });
+
+  // add_to_wishlist
+  // This event fires when an user clicks on the add to wishlist button.
+  $('.panier-btn').on('click', function() {
+    window.dataLayer.push({
+      event: 'add_to_wishlist'
+    });
+  });
+  
+}(jQuery));
+  ;
+/**
+ * @file
+ * JavaScript behaviors for selected values.
+ */
+
+(function($, Drupal) {
+
+  'use strict';
+
+  /**
+   * Get selected values.
+   *
+   * @type {Drupal~behavior}
+   */
+
+  Drupal.behaviors.selected_values = {
+    attach: function (context, settings) {
+      // Get selected brand id and put brand name in the value of the hidden field
+      $('select#edit-brand').on('change', function() {
+        var brand_id = $(this).val();
+        var brand_title = $('select#edit-brand option[value="'+brand_id+'"]').text();
+        $('input[name="brand_name"]').val(brand_title);
+      });
+
+      // Get selected brand id and put brand name in the value of the hidden field
+      $('select#edit-product-line').on('change', function() {
+        var product_id = $(this).val();
+        var product_title = $('select#edit-product-line option[value="'+product_id+'"]').text();
+        $('input[name="product_name"]').val(product_title);
+      });
+    }
+  };
+})(jQuery, Drupal);
+;
+(function($, Drupal) {
+
+  'use strict';
+
+  /**
+   * Add color class to all select options.
+   *
+   * @type {Drupal~behavior}
+   */
+
+  Drupal.behaviors.lg_wf_colors = {
+    attach: function (context, settings) {
+      $(".colors_list > option").each(function() {
+        var el = $(this);
+        var option_value = el.val();
+        el.addClass('legrand-color-'+option_value.replace('#',''));
+      });
+    }
+  };
+})(jQuery, Drupal);
+;
+(function($, Drupal) {
+
+  'use strict';
+
+  /**
+   * Add icon class to all select options.
+   *
+   * @type {Drupal~behavior}
+   */
+
+  Drupal.behaviors.lg_wf_icons = {
+    attach: function (context, settings) {
+      // crate list UL
+      var html = '<ul id="icons_list">';
+      // add classses to option list
+      var cssClass = '';
+      $(".icons_list > option").each(function() {
+        var el = $(this);
+        var option_value = el.val();
+        el.addClass(option_value);
+        cssClass = option_value;
+        if($(this).prop('selected')) {
+          cssClass += ' is-active';
+        }
+        if(option_value != 'no') {
+          html += '<li data-value="'+option_value+'" class="'+cssClass+'">'+el.text()+'</li>';
+        }
+      });
+      html += '</ul>';
+      if(!$('#icons_list').length){
+        $(html).insertBefore('.icons_list');
+      }
+
+      // selected option on click list
+
+      $('#icons_list').on('click', 'li', function() {
+        $(this).toggleClass('is-active');
+        var val = $(this).data('value');
+        var option = $('.icons_list option[value='+val+']');
+        if(option.prop('selected')) {
+          option.removeAttr('selected');
+        } else {
+          option.attr('selected', 'selected');
+        }
+        return false;
+      });
+    }
+
+  };
+})(jQuery, Drupal);
+;
+/*! js-cookie v3.0.1 | MIT */
+!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e=e||self,function(){var n=e.Cookies,o=e.Cookies=t();o.noConflict=function(){return e.Cookies=n,o}}())}(this,(function(){"use strict";function e(e){for(var t=1;t<arguments.length;t++){var n=arguments[t];for(var o in n)e[o]=n[o]}return e}return function t(n,o){function r(t,r,i){if("undefined"!=typeof document){"number"==typeof(i=e({},o,i)).expires&&(i.expires=new Date(Date.now()+864e5*i.expires)),i.expires&&(i.expires=i.expires.toUTCString()),t=encodeURIComponent(t).replace(/%(2[346B]|5E|60|7C)/g,decodeURIComponent).replace(/[()]/g,escape);var c="";for(var u in i)i[u]&&(c+="; "+u,!0!==i[u]&&(c+="="+i[u].split(";")[0]));return document.cookie=t+"="+n.write(r,t)+c}}return Object.create({set:r,get:function(e){if("undefined"!=typeof document&&(!arguments.length||e)){for(var t=document.cookie?document.cookie.split("; "):[],o={},r=0;r<t.length;r++){var i=t[r].split("="),c=i.slice(1).join("=");try{var u=decodeURIComponent(i[0]);if(o[u]=n.read(c,u),e===u)break}catch(e){}}return e?o[e]:o}},remove:function(t,n){r(t,"",e({},n,{expires:-1}))},withAttributes:function(n){return t(this.converter,e({},this.attributes,n))},withConverter:function(n){return t(e({},this.converter,n),this.attributes)}},{attributes:{value:Object.freeze(o)},converter:{value:Object.freeze(n)}})}({read:function(e){return'"'===e[0]&&(e=e.slice(1,-1)),e.replace(/(%[\dA-F]{2})+/gi,decodeURIComponent)},write:function(e){return encodeURIComponent(e).replace(/%(2[346BF]|3[AC-F]|40|5[BDE]|60|7[BCD])/g,decodeURIComponent)}},{path:"/"})}));
+;
+/**
+* DO NOT EDIT THIS FILE.
+* See the following change record for more information,
+* https://www.drupal.org/node/2815083
+* @preserve
+**/
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+(function ($, Drupal, cookies) {
+  var deprecatedMessageSuffix = "is deprecated in Drupal 9.0.0 and will be removed in Drupal 10.0.0. Use the core/js-cookie library instead. See https://www.drupal.org/node/3104677";
+
+  var isFunction = function isFunction(obj) {
+    return Object.prototype.toString.call(obj) === '[object Function]';
+  };
+
+  var parseCookieValue = function parseCookieValue(value, parseJson) {
+    if (value.indexOf('"') === 0) {
+      value = value.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+    }
+
+    try {
+      value = decodeURIComponent(value.replace(/\+/g, ' '));
+      return parseJson ? JSON.parse(value) : value;
+    } catch (e) {}
+  };
+
+  var reader = function reader(cookieValue, cookieName, converter, readUnsanitized, parseJson) {
+    var value = readUnsanitized ? cookieValue : parseCookieValue(cookieValue, parseJson);
+
+    if (converter !== undefined && isFunction(converter)) {
+      return converter(value, cookieName);
+    }
+
+    return value;
+  };
+
+  $.cookie = function (key) {
+    var value = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : undefined;
+    Drupal.deprecationError({
+      message: "jQuery.cookie() ".concat(deprecatedMessageSuffix)
+    });
+
+    if (value !== undefined && !isFunction(value)) {
+      var attributes = _objectSpread(_objectSpread({}, $.cookie.defaults), options);
+
+      if (typeof attributes.expires === 'string' && attributes.expires !== '') {
+        attributes.expires = new Date(attributes.expires);
+      }
+
+      var cookieSetter = cookies.withConverter({
+        write: function write(cookieValue) {
+          return encodeURIComponent(cookieValue);
+        }
+      });
+      value = $.cookie.json && !$.cookie.raw ? JSON.stringify(value) : String(value);
+      return cookieSetter.set(key, value, attributes);
+    }
+
+    var userProvidedConverter = value;
+    var cookiesShim = cookies.withConverter({
+      read: function read(cookieValue, cookieName) {
+        return reader(cookieValue, cookieName, userProvidedConverter, $.cookie.raw, $.cookie.json);
+      }
+    });
+
+    if (key !== undefined) {
+      return cookiesShim.get(key);
+    }
+
+    var results = cookiesShim.get();
+    Object.keys(results).forEach(function (resultKey) {
+      if (results[resultKey] === undefined) {
+        delete results[resultKey];
+      }
+    });
+    return results;
+  };
+
+  $.cookie.defaults = _objectSpread({
+    path: ''
+  }, cookies.defaults);
+  $.cookie.json = false;
+  $.cookie.raw = false;
+
+  $.removeCookie = function (key, options) {
+    Drupal.deprecationError({
+      message: "jQuery.removeCookie() ".concat(deprecatedMessageSuffix)
+    });
+    cookies.remove(key, _objectSpread(_objectSpread({}, $.cookie.defaults), options));
+    return !cookies.get(key);
+  };
+})(jQuery, Drupal, window.Cookies);;
+/**
+* DO NOT EDIT THIS FILE.
+* See the following change record for more information,
+* https://www.drupal.org/node/2815083
+* @preserve
+**/
+
+(function ($, Drupal) {
+  Drupal.theme.progressBar = function (id) {
+    return "<div id=\"".concat(id, "\" class=\"progress\" aria-live=\"polite\">") + '<div class="progress__label">&nbsp;</div>' + '<div class="progress__track"><div class="progress__bar"></div></div>' + '<div class="progress__percentage"></div>' + '<div class="progress__description">&nbsp;</div>' + '</div>';
+  };
+
+  Drupal.ProgressBar = function (id, updateCallback, method, errorCallback) {
+    this.id = id;
+    this.method = method || 'GET';
+    this.updateCallback = updateCallback;
+    this.errorCallback = errorCallback;
+    this.element = $(Drupal.theme('progressBar', id));
+  };
+
+  $.extend(Drupal.ProgressBar.prototype, {
+    setProgress: function setProgress(percentage, message, label) {
+      if (percentage >= 0 && percentage <= 100) {
+        $(this.element).find('div.progress__bar').css('width', "".concat(percentage, "%"));
+        $(this.element).find('div.progress__percentage').html("".concat(percentage, "%"));
+      }
+
+      $('div.progress__description', this.element).html(message);
+      $('div.progress__label', this.element).html(label);
+
+      if (this.updateCallback) {
+        this.updateCallback(percentage, message, this);
+      }
+    },
+    startMonitoring: function startMonitoring(uri, delay) {
+      this.delay = delay;
+      this.uri = uri;
+      this.sendPing();
+    },
+    stopMonitoring: function stopMonitoring() {
+      clearTimeout(this.timer);
+      this.uri = null;
+    },
+    sendPing: function sendPing() {
+      if (this.timer) {
+        clearTimeout(this.timer);
+      }
+
+      if (this.uri) {
+        var pb = this;
+        var uri = this.uri;
+
+        if (uri.indexOf('?') === -1) {
+          uri += '?';
+        } else {
+          uri += '&';
+        }
+
+        uri += '_format=json';
+        $.ajax({
+          type: this.method,
+          url: uri,
+          data: '',
+          dataType: 'json',
+          success: function success(progress) {
+            if (progress.status === 0) {
+              pb.displayError(progress.data);
+              return;
+            }
+
+            pb.setProgress(progress.percentage, progress.message, progress.label);
+            pb.timer = setTimeout(function () {
+              pb.sendPing();
+            }, pb.delay);
+          },
+          error: function error(xmlhttp) {
+            var e = new Drupal.AjaxError(xmlhttp, pb.uri);
+            pb.displayError("<pre>".concat(e.message, "</pre>"));
+          }
+        });
+      }
+    },
+    displayError: function displayError(string) {
+      var error = $('<div class="messages messages--error"></div>').html(string);
+      $(this.element).before(error).hide();
+
+      if (this.errorCallback) {
+        this.errorCallback(this);
+      }
+    }
+  });
+})(jQuery, Drupal);;
+/**
+* DO NOT EDIT THIS FILE.
+* See the following change record for more information,
+* https://www.drupal.org/node/2815083
+* @preserve
+**/
+
+(function (Drupal) {
+  Drupal.behaviors.responsiveImageAJAX = {
+    attach: function attach() {
+      if (window.picturefill) {
+        window.picturefill();
+      }
+    }
+  };
+})(Drupal);;
+/**
+* DO NOT EDIT THIS FILE.
+* See the following change record for more information,
+* https://www.drupal.org/node/2815083
+* @preserve
+**/
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+(function ($, window, Drupal, drupalSettings, _ref) {
+  var isFocusable = _ref.isFocusable,
+      tabbable = _ref.tabbable;
+  Drupal.behaviors.AJAX = {
+    attach: function attach(context, settings) {
+      function loadAjaxBehavior(base) {
+        var elementSettings = settings.ajax[base];
+
+        if (typeof elementSettings.selector === 'undefined') {
+          elementSettings.selector = "#".concat(base);
+        }
+
+        once('drupal-ajax', $(elementSettings.selector)).forEach(function (el) {
+          elementSettings.element = el;
+          elementSettings.base = base;
+          Drupal.ajax(elementSettings);
+        });
+      }
+
+      Object.keys(settings.ajax || {}).forEach(function (base) {
+        return loadAjaxBehavior(base);
+      });
+      Drupal.ajax.bindAjaxLinks(document.body);
+      once('ajax', '.use-ajax-submit').forEach(function (el) {
+        var elementSettings = {};
+        elementSettings.url = $(el.form).attr('action');
+        elementSettings.setClick = true;
+        elementSettings.event = 'click';
+        elementSettings.progress = {
+          type: 'throbber'
+        };
+        elementSettings.base = el.id;
+        elementSettings.element = el;
+        Drupal.ajax(elementSettings);
+      });
+    },
+    detach: function detach(context, settings, trigger) {
+      if (trigger === 'unload') {
+        Drupal.ajax.expired().forEach(function (instance) {
+          Drupal.ajax.instances[instance.instanceIndex] = null;
+        });
+      }
+    }
+  };
+
+  Drupal.AjaxError = function (xmlhttp, uri, customMessage) {
+    var statusCode;
+    var statusText;
+    var responseText;
+
+    if (xmlhttp.status) {
+      statusCode = "\n".concat(Drupal.t('An AJAX HTTP error occurred.'), "\n").concat(Drupal.t('HTTP Result Code: !status', {
+        '!status': xmlhttp.status
+      }));
+    } else {
+      statusCode = "\n".concat(Drupal.t('An AJAX HTTP request terminated abnormally.'));
+    }
+
+    statusCode += "\n".concat(Drupal.t('Debugging information follows.'));
+    var pathText = "\n".concat(Drupal.t('Path: !uri', {
+      '!uri': uri
+    }));
+    statusText = '';
+
+    try {
+      statusText = "\n".concat(Drupal.t('StatusText: !statusText', {
+        '!statusText': xmlhttp.statusText.trim()
+      }));
+    } catch (e) {}
+
+    responseText = '';
+
+    try {
+      responseText = "\n".concat(Drupal.t('ResponseText: !responseText', {
+        '!responseText': xmlhttp.responseText.trim()
+      }));
+    } catch (e) {}
+
+    responseText = responseText.replace(/<("[^"]*"|'[^']*'|[^'">])*>/gi, '');
+    responseText = responseText.replace(/[\n]+\s+/g, '\n');
+    var readyStateText = xmlhttp.status === 0 ? "\n".concat(Drupal.t('ReadyState: !readyState', {
+      '!readyState': xmlhttp.readyState
+    })) : '';
+    customMessage = customMessage ? "\n".concat(Drupal.t('CustomMessage: !customMessage', {
+      '!customMessage': customMessage
+    })) : '';
+    this.message = statusCode + pathText + statusText + customMessage + responseText + readyStateText;
+    this.name = 'AjaxError';
+  };
+
+  Drupal.AjaxError.prototype = new Error();
+  Drupal.AjaxError.prototype.constructor = Drupal.AjaxError;
+
+  Drupal.ajax = function (settings) {
+    if (arguments.length !== 1) {
+      throw new Error('Drupal.ajax() function must be called with one configuration object only');
+    }
+
+    var base = settings.base || false;
+    var element = settings.element || false;
+    delete settings.base;
+    delete settings.element;
+
+    if (!settings.progress && !element) {
+      settings.progress = false;
+    }
+
+    var ajax = new Drupal.Ajax(base, element, settings);
+    ajax.instanceIndex = Drupal.ajax.instances.length;
+    Drupal.ajax.instances.push(ajax);
+    return ajax;
+  };
+
+  Drupal.ajax.instances = [];
+
+  Drupal.ajax.expired = function () {
+    return Drupal.ajax.instances.filter(function (instance) {
+      return instance && instance.element !== false && !document.body.contains(instance.element);
+    });
+  };
+
+  Drupal.ajax.bindAjaxLinks = function (element) {
+    once('ajax', '.use-ajax', element).forEach(function (ajaxLink) {
+      var $linkElement = $(ajaxLink);
+      var elementSettings = {
+        progress: {
+          type: 'throbber'
+        },
+        dialogType: $linkElement.data('dialog-type'),
+        dialog: $linkElement.data('dialog-options'),
+        dialogRenderer: $linkElement.data('dialog-renderer'),
+        base: $linkElement.attr('id'),
+        element: ajaxLink
+      };
+      var href = $linkElement.attr('href');
+
+      if (href) {
+        elementSettings.url = href;
+        elementSettings.event = 'click';
+      }
+
+      Drupal.ajax(elementSettings);
+    });
+  };
+
+  Drupal.Ajax = function (base, element, elementSettings) {
+    var defaults = {
+      event: element ? 'mousedown' : null,
+      keypress: true,
+      selector: base ? "#".concat(base) : null,
+      effect: 'none',
+      speed: 'none',
+      method: 'replaceWith',
+      progress: {
+        type: 'throbber',
+        message: Drupal.t('Please wait...')
+      },
+      submit: {
+        js: true
+      }
+    };
+    $.extend(this, defaults, elementSettings);
+    this.commands = new Drupal.AjaxCommands();
+    this.instanceIndex = false;
+
+    if (this.wrapper) {
+      this.wrapper = "#".concat(this.wrapper);
+    }
+
+    this.element = element;
+    this.element_settings = elementSettings;
+    this.elementSettings = elementSettings;
+
+    if (this.element && this.element.form) {
+      this.$form = $(this.element.form);
+    }
+
+    if (!this.url) {
+      var $element = $(this.element);
+
+      if ($element.is('a')) {
+        this.url = $element.attr('href');
+      } else if (this.element && element.form) {
+        this.url = this.$form.attr('action');
+      }
+    }
+
+    var originalUrl = this.url;
+    this.url = this.url.replace(/\/nojs(\/|$|\?|#)/, '/ajax$1');
+
+    if (drupalSettings.ajaxTrustedUrl[originalUrl]) {
+      drupalSettings.ajaxTrustedUrl[this.url] = true;
+    }
+
+    var ajax = this;
+    ajax.options = {
+      url: ajax.url,
+      data: ajax.submit,
+      beforeSerialize: function beforeSerialize(elementSettings, options) {
+        return ajax.beforeSerialize(elementSettings, options);
+      },
+      beforeSubmit: function beforeSubmit(formValues, elementSettings, options) {
+        ajax.ajaxing = true;
+        return ajax.beforeSubmit(formValues, elementSettings, options);
+      },
+      beforeSend: function beforeSend(xmlhttprequest, options) {
+        ajax.ajaxing = true;
+        return ajax.beforeSend(xmlhttprequest, options);
+      },
+      success: function success(response, status, xmlhttprequest) {
+        if (typeof response === 'string') {
+          response = $.parseJSON(response);
+        }
+
+        if (response !== null && !drupalSettings.ajaxTrustedUrl[ajax.url]) {
+          if (xmlhttprequest.getResponseHeader('X-Drupal-Ajax-Token') !== '1') {
+            var customMessage = Drupal.t('The response failed verification so will not be processed.');
+            return ajax.error(xmlhttprequest, ajax.url, customMessage);
+          }
+        }
+
+        return ajax.success(response, status);
+      },
+      complete: function complete(xmlhttprequest, status) {
+        ajax.ajaxing = false;
+
+        if (status === 'error' || status === 'parsererror') {
+          return ajax.error(xmlhttprequest, ajax.url);
+        }
+      },
+      dataType: 'json',
+      jsonp: false,
+      type: 'POST'
+    };
+
+    if (elementSettings.dialog) {
+      ajax.options.data.dialogOptions = elementSettings.dialog;
+    }
+
+    if (ajax.options.url.indexOf('?') === -1) {
+      ajax.options.url += '?';
+    } else {
+      ajax.options.url += '&';
+    }
+
+    var wrapper = "drupal_".concat(elementSettings.dialogType || 'ajax');
+
+    if (elementSettings.dialogRenderer) {
+      wrapper += ".".concat(elementSettings.dialogRenderer);
+    }
+
+    ajax.options.url += "".concat(Drupal.ajax.WRAPPER_FORMAT, "=").concat(wrapper);
+    $(ajax.element).on(elementSettings.event, function (event) {
+      if (!drupalSettings.ajaxTrustedUrl[ajax.url] && !Drupal.url.isLocal(ajax.url)) {
+        throw new Error(Drupal.t('The callback URL is not local and not trusted: !url', {
+          '!url': ajax.url
+        }));
+      }
+
+      return ajax.eventResponse(this, event);
+    });
+
+    if (elementSettings.keypress) {
+      $(ajax.element).on('keypress', function (event) {
+        return ajax.keypressResponse(this, event);
+      });
+    }
+
+    if (elementSettings.prevent) {
+      $(ajax.element).on(elementSettings.prevent, false);
+    }
+  };
+
+  Drupal.ajax.WRAPPER_FORMAT = '_wrapper_format';
+  Drupal.Ajax.AJAX_REQUEST_PARAMETER = '_drupal_ajax';
+
+  Drupal.Ajax.prototype.execute = function () {
+    if (this.ajaxing) {
+      return;
+    }
+
+    try {
+      this.beforeSerialize(this.element, this.options);
+      return $.ajax(this.options);
+    } catch (e) {
+      this.ajaxing = false;
+      window.alert("An error occurred while attempting to process ".concat(this.options.url, ": ").concat(e.message));
+      return $.Deferred().reject();
+    }
+  };
+
+  Drupal.Ajax.prototype.keypressResponse = function (element, event) {
+    var ajax = this;
+
+    if (event.which === 13 || event.which === 32 && element.type !== 'text' && element.type !== 'textarea' && element.type !== 'tel' && element.type !== 'number') {
+      event.preventDefault();
+      event.stopPropagation();
+      $(element).trigger(ajax.elementSettings.event);
+    }
+  };
+
+  Drupal.Ajax.prototype.eventResponse = function (element, event) {
+    event.preventDefault();
+    event.stopPropagation();
+    var ajax = this;
+
+    if (ajax.ajaxing) {
+      return;
+    }
+
+    try {
+      if (ajax.$form) {
+        if (ajax.setClick) {
+          element.form.clk = element;
+        }
+
+        ajax.$form.ajaxSubmit(ajax.options);
+      } else {
+        ajax.beforeSerialize(ajax.element, ajax.options);
+        $.ajax(ajax.options);
+      }
+    } catch (e) {
+      ajax.ajaxing = false;
+      window.alert("An error occurred while attempting to process ".concat(ajax.options.url, ": ").concat(e.message));
+    }
+  };
+
+  Drupal.Ajax.prototype.beforeSerialize = function (element, options) {
+    if (this.$form && document.body.contains(this.$form.get(0))) {
+      var settings = this.settings || drupalSettings;
+      Drupal.detachBehaviors(this.$form.get(0), settings, 'serialize');
+    }
+
+    options.data[Drupal.Ajax.AJAX_REQUEST_PARAMETER] = 1;
+    var pageState = drupalSettings.ajaxPageState;
+    options.data['ajax_page_state[theme]'] = pageState.theme;
+    options.data['ajax_page_state[theme_token]'] = pageState.theme_token;
+    options.data['ajax_page_state[libraries]'] = pageState.libraries;
+  };
+
+  Drupal.Ajax.prototype.beforeSubmit = function (formValues, element, options) {};
+
+  Drupal.Ajax.prototype.beforeSend = function (xmlhttprequest, options) {
+    if (this.$form) {
+      options.extraData = options.extraData || {};
+      options.extraData.ajax_iframe_upload = '1';
+      var v = $.fieldValue(this.element);
+
+      if (v !== null) {
+        options.extraData[this.element.name] = v;
+      }
+    }
+
+    $(this.element).prop('disabled', true);
+
+    if (!this.progress || !this.progress.type) {
+      return;
+    }
+
+    var progressIndicatorMethod = "setProgressIndicator".concat(this.progress.type.slice(0, 1).toUpperCase()).concat(this.progress.type.slice(1).toLowerCase());
+
+    if (progressIndicatorMethod in this && typeof this[progressIndicatorMethod] === 'function') {
+      this[progressIndicatorMethod].call(this);
+    }
+  };
+
+  Drupal.theme.ajaxProgressThrobber = function (message) {
+    var messageMarkup = typeof message === 'string' ? Drupal.theme('ajaxProgressMessage', message) : '';
+    var throbber = '<div class="throbber">&nbsp;</div>';
+    return "<div class=\"ajax-progress ajax-progress-throbber\">".concat(throbber).concat(messageMarkup, "</div>");
+  };
+
+  Drupal.theme.ajaxProgressIndicatorFullscreen = function () {
+    return '<div class="ajax-progress ajax-progress-fullscreen">&nbsp;</div>';
+  };
+
+  Drupal.theme.ajaxProgressMessage = function (message) {
+    return "<div class=\"message\">".concat(message, "</div>");
+  };
+
+  Drupal.theme.ajaxProgressBar = function ($element) {
+    return $('<div class="ajax-progress ajax-progress-bar"></div>').append($element);
+  };
+
+  Drupal.Ajax.prototype.setProgressIndicatorBar = function () {
+    var progressBar = new Drupal.ProgressBar("ajax-progress-".concat(this.element.id), $.noop, this.progress.method, $.noop);
+
+    if (this.progress.message) {
+      progressBar.setProgress(-1, this.progress.message);
+    }
+
+    if (this.progress.url) {
+      progressBar.startMonitoring(this.progress.url, this.progress.interval || 1500);
+    }
+
+    this.progress.element = $(Drupal.theme('ajaxProgressBar', progressBar.element));
+    this.progress.object = progressBar;
+    $(this.element).after(this.progress.element);
+  };
+
+  Drupal.Ajax.prototype.setProgressIndicatorThrobber = function () {
+    this.progress.element = $(Drupal.theme('ajaxProgressThrobber', this.progress.message));
+    $(this.element).after(this.progress.element);
+  };
+
+  Drupal.Ajax.prototype.setProgressIndicatorFullscreen = function () {
+    this.progress.element = $(Drupal.theme('ajaxProgressIndicatorFullscreen'));
+    $('body').append(this.progress.element);
+  };
+
+  Drupal.Ajax.prototype.success = function (response, status) {
+    var _this = this;
+
+    if (this.progress.element) {
+      $(this.progress.element).remove();
+    }
+
+    if (this.progress.object) {
+      this.progress.object.stopMonitoring();
+    }
+
+    $(this.element).prop('disabled', false);
+    var elementParents = $(this.element).parents('[data-drupal-selector]').addBack().toArray();
+    var focusChanged = false;
+    Object.keys(response || {}).forEach(function (i) {
+      if (response[i].command && _this.commands[response[i].command]) {
+        _this.commands[response[i].command](_this, response[i], status);
+
+        if (response[i].command === 'invoke' && response[i].method === 'focus' || response[i].command === 'focusFirst') {
+          focusChanged = true;
+        }
+      }
+    });
+
+    if (!focusChanged && this.element && !$(this.element).data('disable-refocus')) {
+      var target = false;
+
+      for (var n = elementParents.length - 1; !target && n >= 0; n--) {
+        target = document.querySelector("[data-drupal-selector=\"".concat(elementParents[n].getAttribute('data-drupal-selector'), "\"]"));
+      }
+
+      if (target) {
+        $(target).trigger('focus');
+      }
+    }
+
+    if (this.$form && document.body.contains(this.$form.get(0))) {
+      var settings = this.settings || drupalSettings;
+      Drupal.attachBehaviors(this.$form.get(0), settings);
+    }
+
+    this.settings = null;
+  };
+
+  Drupal.Ajax.prototype.getEffect = function (response) {
+    var type = response.effect || this.effect;
+    var speed = response.speed || this.speed;
+    var effect = {};
+
+    if (type === 'none') {
+      effect.showEffect = 'show';
+      effect.hideEffect = 'hide';
+      effect.showSpeed = '';
+    } else if (type === 'fade') {
+      effect.showEffect = 'fadeIn';
+      effect.hideEffect = 'fadeOut';
+      effect.showSpeed = speed;
+    } else {
+      effect.showEffect = "".concat(type, "Toggle");
+      effect.hideEffect = "".concat(type, "Toggle");
+      effect.showSpeed = speed;
+    }
+
+    return effect;
+  };
+
+  Drupal.Ajax.prototype.error = function (xmlhttprequest, uri, customMessage) {
+    if (this.progress.element) {
+      $(this.progress.element).remove();
+    }
+
+    if (this.progress.object) {
+      this.progress.object.stopMonitoring();
+    }
+
+    $(this.wrapper).show();
+    $(this.element).prop('disabled', false);
+
+    if (this.$form && document.body.contains(this.$form.get(0))) {
+      var settings = this.settings || drupalSettings;
+      Drupal.attachBehaviors(this.$form.get(0), settings);
+    }
+
+    throw new Drupal.AjaxError(xmlhttprequest, uri, customMessage);
+  };
+
+  Drupal.theme.ajaxWrapperNewContent = function ($newContent, ajax, response) {
+    return (response.effect || ajax.effect) !== 'none' && $newContent.filter(function (i) {
+      return !($newContent[i].nodeName === '#comment' || $newContent[i].nodeName === '#text' && /^(\s|\n|\r)*$/.test($newContent[i].textContent));
+    }).length > 1 ? Drupal.theme('ajaxWrapperMultipleRootElements', $newContent) : $newContent;
+  };
+
+  Drupal.theme.ajaxWrapperMultipleRootElements = function ($elements) {
+    return $('<div></div>').append($elements);
+  };
+
+  Drupal.AjaxCommands = function () {};
+
+  Drupal.AjaxCommands.prototype = {
+    insert: function insert(ajax, response) {
+      var $wrapper = response.selector ? $(response.selector) : $(ajax.wrapper);
+      var method = response.method || ajax.method;
+      var effect = ajax.getEffect(response);
+      var settings = response.settings || ajax.settings || drupalSettings;
+      var $newContent = $($.parseHTML(response.data, document, true));
+      $newContent = Drupal.theme('ajaxWrapperNewContent', $newContent, ajax, response);
+
+      switch (method) {
+        case 'html':
+        case 'replaceWith':
+        case 'replaceAll':
+        case 'empty':
+        case 'remove':
+          Drupal.detachBehaviors($wrapper.get(0), settings);
+          break;
+
+        default:
+          break;
+      }
+
+      $wrapper[method]($newContent);
+
+      if (effect.showEffect !== 'show') {
+        $newContent.hide();
+      }
+
+      var $ajaxNewContent = $newContent.find('.ajax-new-content');
+
+      if ($ajaxNewContent.length) {
+        $ajaxNewContent.hide();
+        $newContent.show();
+        $ajaxNewContent[effect.showEffect](effect.showSpeed);
+      } else if (effect.showEffect !== 'show') {
+        $newContent[effect.showEffect](effect.showSpeed);
+      }
+
+      if ($newContent.parents('html').length) {
+        $newContent.each(function (index, element) {
+          if (element.nodeType === Node.ELEMENT_NODE) {
+            Drupal.attachBehaviors(element, settings);
+          }
+        });
+      }
+    },
+    remove: function remove(ajax, response, status) {
+      var settings = response.settings || ajax.settings || drupalSettings;
+      $(response.selector).each(function () {
+        Drupal.detachBehaviors(this, settings);
+      }).remove();
+    },
+    changed: function changed(ajax, response, status) {
+      var $element = $(response.selector);
+
+      if (!$element.hasClass('ajax-changed')) {
+        $element.addClass('ajax-changed');
+
+        if (response.asterisk) {
+          $element.find(response.asterisk).append(" <abbr class=\"ajax-changed\" title=\"".concat(Drupal.t('Changed'), "\">*</abbr> "));
+        }
+      }
+    },
+    alert: function alert(ajax, response, status) {
+      window.alert(response.text);
+    },
+    announce: function announce(ajax, response) {
+      if (response.priority) {
+        Drupal.announce(response.text, response.priority);
+      } else {
+        Drupal.announce(response.text);
+      }
+    },
+    redirect: function redirect(ajax, response, status) {
+      window.location = response.url;
+    },
+    css: function css(ajax, response, status) {
+      $(response.selector).css(response.argument);
+    },
+    settings: function settings(ajax, response, status) {
+      var ajaxSettings = drupalSettings.ajax;
+
+      if (ajaxSettings) {
+        Drupal.ajax.expired().forEach(function (instance) {
+          if (instance.selector) {
+            var selector = instance.selector.replace('#', '');
+
+            if (selector in ajaxSettings) {
+              delete ajaxSettings[selector];
+            }
+          }
+        });
+      }
+
+      if (response.merge) {
+        $.extend(true, drupalSettings, response.settings);
+      } else {
+        ajax.settings = response.settings;
+      }
+    },
+    data: function data(ajax, response, status) {
+      $(response.selector).data(response.name, response.value);
+    },
+    focusFirst: function focusFirst(ajax, response, status) {
+      var focusChanged = false;
+      var container = document.querySelector(response.selector);
+
+      if (container) {
+        var tabbableElements = tabbable(container);
+
+        if (tabbableElements.length) {
+          tabbableElements[0].focus();
+          focusChanged = true;
+        } else if (isFocusable(container)) {
+          container.focus();
+          focusChanged = true;
+        }
+      }
+
+      if (ajax.hasOwnProperty('element') && !focusChanged) {
+        ajax.element.focus();
+      }
+    },
+    invoke: function invoke(ajax, response, status) {
+      var $element = $(response.selector);
+      $element[response.method].apply($element, _toConsumableArray(response.args));
+    },
+    restripe: function restripe(ajax, response, status) {
+      $(response.selector).find('> tbody > tr:visible, > tr:visible').removeClass('odd even').filter(':even').addClass('odd').end().filter(':odd').addClass('even');
+    },
+    update_build_id: function update_build_id(ajax, response, status) {
+      $("input[name=\"form_build_id\"][value=\"".concat(response.old, "\"]")).val(response.new);
+    },
+    add_css: function add_css(ajax, response, status) {
+      $('head').prepend(response.data);
+    },
+    message: function message(ajax, response) {
+      var messages = new Drupal.Message(document.querySelector(response.messageWrapperQuerySelector));
+
+      if (response.clearPrevious) {
+        messages.clear();
+      }
+
+      messages.add(response.message, response.messageOptions);
+    }
+  };
+})(jQuery, window, Drupal, drupalSettings, window.tabbable);;
+(function ($, Drupal, drupalSettings) {
+
+  var gridBreakpoints = {
+    xs: 0,
+    sm: 768,
+    md: 1024,
+    lg: 1280,
+    xl: 1600
+  };
+
+  var ww = $(window).width();
+  var timerSLider = 500;
+  getSectionBlockProducts();
+
+  /* Trigger event when checking product compare checkbox */
+  const comparatorCookie = jQuery.cookie('comparator_products');
+  let products = comparatorCookie ? comparatorCookie.split(/,/) : new Array();
+
+  let checkboxSelector = '.compare-check';
+
+  jQuery('.btn-comparator-footer').on('click', function (event) {
+    event.preventDefault();
+  });
+
+  // If we reload the page, the checkbox should still be checked.
+  $(checkboxSelector).each(function() {
+    const checkboxCookie = jQuery.cookie($(this).attr('id'));
+    if (checkboxCookie && checkboxCookie == "true") {
+      $(this).prop('checked', checkboxCookie);
+    }
+  });
+
+  // Show tooltip on checkbox hover.
+  $('.custom-checkbox')
+    .mouseout(function() {
+      $(this).find('.tooltiptext').attr('style', '');
+    })
+    .mouseover(function() {
+      if (products.length >= 4) {
+        // Show tooltip only for non selected products.
+        var checkbox = $(this).find('.compare-check');
+        if (!checkbox.is(':checked')) {
+          var tooltip = $(this).find('.tooltiptext');
+          if(tooltip.offset().left < 0) {
+            tooltip.css({'visibility': 'visible', 'opacity': '1', 'left' : '100%'});
+          } else if(tooltip.offset().left + tooltip.width() > $(window).width()) {
+            tooltip.css({'visibility': 'visible', 'opacity': '1', 'left' : 'auto', 'right': '0'});
+          } else {
+            tooltip.css({'visibility': 'visible', 'opacity': '1'});
+          }
+        }
+      }
+    });
+
+  // Comparator section block state.
+  $('.btn-comparator-footer').on('click', function (e) {
+    e.preventDefault();
+    $(this).toggleClass('is-shrink');
+    if ($(this).hasClass('is-shrink')) {
+      jQuery.cookie('comparator_block_shrink', 'true', {path: '/' });
+    }
+    else {
+      jQuery.cookie('comparator_block_shrink', 'false', {path: '/' });
+    }
+  });
+
+  appendDeleteEvent();
+
+  // Product compare checkbox event.
+  $('body').delegate('.compare-check', 'change', function(e) {
+    e.preventDefault();
+    let productId = $(this).closest('.custom-checkbox').find('.custom-control-label').attr('for');
+    productId = productId.substr(productId.indexOf("_") + 1);
+    // Synchronize product check state between all of it rendered instances.
+    $(`input[id=customCheck_${productId}]`).prop('checked',this.checked);
+
+    if (this.checked) {
+      // Make sure that the cookie have 4 elements max.
+      if (products.length <= 3) {
+        // before pushing, test if product exist.
+        addProductToCookie(productId);
+        // Store checkbox state also in cookie.
+        jQuery.cookie($(this).attr('id'), $(this).prop('checked'), {path: '/' });
+        // Ajax callback for html section.
+        ajaxCallBack(productId, products.length - 1);
+        // Ajax callback for thumbnail html section.
+        ajaxThumbnailCallBack(productId, products.length - 1);
+      }
+    }
+    else {
+      // remove product from cookie.
+      deleteProductFromCookie(productId);
+      // remove checkbox from cookies.
+      deleteCheckboxCookie($(this).attr('id'));
+      // Remove product from comparator all pages section.
+      $('#comparator-list-products').find(`.comparator-item[data-id='${productId}']`).remove();
+      appendComparatorEmptyCards();
+      // update comparator counter.
+      incrementComparatorCounter();
+      ajaxOutCallBack();
+      // Remove product from comparator thumbnail section.
+      removeProductCardFromThumbnailSection(productId);
+      // Delete thumbnail
+      $('#comparator-products-thumbnails').find(`.comparator-item-thumbnail[data-id='${productId}']`).remove();
+      appendComparatorEmptyThumbnails();
+    }
+  });
+
+  // Delete product from comparator click event.
+  $("body").delegate(".comparator-product-delete", "click", function() {
+    let productId = $(this).parents('.comparator-item').attr('data-id');
+    deleteProductFromCookie(productId);
+    // Uncheck checkbox.
+    let checkbox = $('body').find(`.card-product[data-id='${productId}']`).find('.compare-check');
+    checkbox.prop('checked', false);
+    //let checkboxId = checkbox.attr('id');
+    // Delete checkbox cookie.
+    deleteCheckboxCookie('customCheck_' + productId);
+    // update comparator counter.
+    decrementComparatorCounter();
+    ajaxOutCallBack();
+    // Remove product from comparator thumbnail section.
+    removeProductCardFromThumbnailSection(productId);
+    // Remove product from comparator all pages section.
+    $('#comparator-list-products').find(`.comparator-item[data-id='${productId}']`).remove();
+    appendComparatorEmptyCards();
+    // Delete thumbnail
+    $('#comparator-products-thumbnails').find(`.comparator-item-thumbnail[data-id='${productId}']`).remove();
+    appendComparatorEmptyThumbnails();
+  });
+
+  // Empty comparator click event.
+  jQuery('#btn-empty-comparator').click(function (e) {
+    e.preventDefault();
+    $('#comparator-counter').text('0');
+    $('.comparator-item').remove();
+    $('.compare-check').prop('checked', false);
+    jQuery.cookie('comparator_products', '', {path: '/' });
+    deleteCheckboxesCookies();
+    ajaxOutCallBack();
+    // Reload page.
+    location.reload();
+  });
+
+  function deleteCheckboxesCookies() {
+    let cookies = document.cookie.split(';');
+    let i;
+    for (i = 0; i < cookies.length; ++i) {
+      let cookieName = cookies[i].substring(0, cookies[i].indexOf('='));
+      cookieName = cookieName.split(' ').join('');
+      if (cookieName.substring(0, 11) === "customCheck") {
+        jQuery.cookie(cookieName, null, {path: '/' });
+      }
+    }
+  }
+
+  function deleteProductFromCookie(product) {
+    let index = products.indexOf(product);
+    if(index != -1) products.splice(index, 1);
+    jQuery.cookie('comparator_products', products.join(','), {path: '/' });
+  }
+
+  function addProductToCookie(product) {
+    if(jQuery.inArray(product, products) == -1){
+      products.push(product);
+      jQuery.cookie('comparator_products', products, {path: '/' });
+    }
+  }
+
+  function deleteCheckboxCookie(id) {
+    jQuery.cookie(id, null, {path: '/' });
+  }
+
+  function incrementComparatorCounter() {
+    let count = $("#comparator-list-products .comparator-item").length;
+    $('#comparator-counter').text(count);
+  }
+
+  function decrementComparatorCounter() {
+    let count = $("#comparator-list-products .comparator-item").length;
+    $('#comparator-counter').text(count - 1);
+  }
+
+  function appendComparatorEmptyThumbnails() {
+    let comparatorThumbnailsCounter = $("#comparator-products-thumbnails .comparator-item-thumbnail").length;
+    let cardSelector = '#comparator-products-thumbnails .thumbnail-empty-card';
+    let comparatorListThumbnails = '#comparator-products-thumbnails';
+    let emptyThumbnail = '<div class="col thumbnail-empty-card"><div class="comparator-thubmnail comparator-thubmnail-empty"><span class="icon-empty-comparator"></span></div></div>';
+
+    let emptyOneThumbnail = emptyThumbnail;
+    let emptyTwoThumbnails = emptyThumbnail + emptyThumbnail;
+    let emptyThreeThumbnails = emptyThumbnail + emptyThumbnail + emptyThumbnail;
+    switch (comparatorThumbnailsCounter) {
+      case 1:
+        $(cardSelector).remove();
+        $(comparatorListThumbnails).append(emptyThreeThumbnails);
+        break;
+      case 2:
+        $(cardSelector).remove();
+        $(comparatorListThumbnails).append(emptyTwoThumbnails);
+        break;
+      case 3:
+        $(cardSelector).remove();
+        $(comparatorListThumbnails).append(emptyOneThumbnail);
+        break;
+      case 4:
+        $(cardSelector).remove();
+        break;
+    }
+  }
+
+  function appendComparatorEmptyCards() {
+    let comparatorItemsCounter = $("#comparator-list-products .comparator-item").length;
+    let cardSelector = '#comparator-list-products .comparator-empty-card';
+    let comparatorListProducts = '#comparator-list-products';
+    let emptyCard = '<div class="col comparator-empty-card"><div class="card-custom card-product card-row card card-empty-comparator"><span class="icon-empty-comparator"></span></div></div>';
+
+    let emptyOneCard = emptyCard;
+    let emptyTwoCards = emptyCard + emptyCard;
+    let emptyThreeCards = emptyCard + emptyCard + emptyCard;
+    switch (comparatorItemsCounter) {
+      case 1:
+        $(cardSelector).remove();
+        $(comparatorListProducts).append(emptyThreeCards);
+        break;
+      case 2:
+        $(cardSelector).remove();
+        $(comparatorListProducts).append(emptyTwoCards);
+        break;
+      case 3:
+        $(cardSelector).remove();
+        $(comparatorListProducts).append(emptyOneCard);
+        break;
+      case 4:
+        $(comparatorListProducts).append(emptyOneCard);
+        $(cardSelector).remove();
+        break;
+    }
+  }
+
+  function removeProductCardFromThumbnailSection(id) {
+    $('#comparator-products-thumbnails').find(`.comparator-thubmnail[data-id='${id}']`).remove();
+  }
+
+  function ajaxOutCallBack() {
+    $.ajax({
+      url: Drupal.url('compare-product-delete'),
+      type: 'POST',
+      dataType: 'json',
+      success: function (response) {
+        // Handling comparator empty cards.
+        appendComparatorEmptyCards();
+        //appendComparatorEmptyThumbnails();
+      }
+    });
+  }
+
+  // Reorder comparator cards.
+  function reorderCards() {
+    var items = $('.comparator-item');
+    items.sort(function(a, b){
+      return parseInt($(a).data('position')) - parseInt($(b).data('position'));
+    });
+    items.appendTo('#comparator-list-products');
+  }
+
+  // Reorder comparator thumbnails.
+  function reorderThumbnails() {
+    var items = $('.comparator-item-thumbnail');
+    items.sort(function(a, b){
+      return parseInt($(a).data('position')) - parseInt($(b).data('position'));
+    });
+    items.appendTo('#comparator-products-thumbnails');
+  }
+
+
+  // show only differences
+  function showOnlyDifferences() {
+    $('#show_differencies').on('change', function() {
+      if($(this).is(":checked")) {
+        $('.table-comparator-technique .row-child').each(function(index, item) {
+          let td = $(item).find('.comparator-value');
+          if (td.length === 2) {
+            if ($(td).eq(0).text().trim() === $(td).eq(1).text().trim()) {
+              $(this).closest('.row-parent').fadeOut();
+              $(this).closest('.row-parent').addClass("faded");
+              comparatorTableColumnsReorder();
+            }
+          }
+          if (td.length === 3) {
+            if ($(td).eq(0).text().trim() === $(td).eq(1).text().trim() && $(td).eq(0).text().trim() === $(td).eq(2).text().trim()) {
+              $(this).closest('.row-parent').fadeOut();
+              $(this).closest('.row-parent').addClass("faded");
+              comparatorTableColumnsReorder();
+            }
+          }
+          if (td.length === 4) {
+            if ($(td).eq(0).text().trim() === $(td).eq(1).text().trim() && $(td).eq(0).text().trim() === $(td).eq(2).text().trim() && $(td).eq(0).text().trim() === $(td).eq(3).text().trim()) {
+              $(this).closest('.row-parent').fadeOut();
+              $(this).closest('.row-parent').addClass("faded");
+              comparatorTableColumnsReorder();
+            }
+          }
+        });
+      } else {
+        $('.table-comparator-technique .row-parent').each(function(index, item) {
+          $(item).removeClass('faded');
+          $(item).fadeIn();
+          comparatorTableColumnsReorder();
+        });
+      }
+    });
+  }
+
+
+
+
+
+  // Change columns background.
+  function comparatorTableColumnsReorder() {
+    $('.table-comparator-technique .row-child, .table-comparator-technique .row-parent').css('background-color', '#fff');
+    $('.table-comparator-technique .row-parent:not(.faded)').each(function(i, el){
+      if (i % 2 === 0) {
+        $(this).css('background-color', '#fff');
+      }
+      else {
+        $(this).css('background-color', '#ECF4F8');
+        $(this).find('.row-child').css('background-color', '#ECF4F8');
+      }
+    });
+  }
+
+  function ajaxCallBack(product_id, position) {
+    const langCode = drupalSettings.path.pathPrefix;
+    const ajaxSettings = {
+      url: "/" + langCode + 'compare-product/' + product_id + '/' + position,
+    };
+    const ProductAjaxObject = Drupal.ajax(ajaxSettings);
+
+    ProductAjaxObject.commands.insert = function (ajax, response, status) {
+      $('#comparator-list-products').append(response.data);
+      // update comparator counter.
+      incrementComparatorCounter();
+      // Handling comparator empty cards.
+      appendComparatorEmptyCards();
+    };
+    ProductAjaxObject.commands.destroyObject = function (ajax, response, status) {
+      Drupal.ajax.instances[this.instanceIndex] = null;
+    };
+    ProductAjaxObject.execute();
+  }
+
+  function ajaxThumbnailCallBack(product_id, position) {
+    const langCode = drupalSettings.path.pathPrefix;
+    const ajaxSettings = {
+      url: "/" + langCode + 'product-thumbnail/' + product_id + '/' + position,
+    };
+    const ProductThumbnailAjaxObject = Drupal.ajax(ajaxSettings);
+
+    ProductThumbnailAjaxObject.commands.insert = function (ajax, response, status) {
+      $('#comparator-products-thumbnails').append(response.data);
+      appendComparatorEmptyThumbnails();
+    };
+    ProductThumbnailAjaxObject.commands.destroyObject = function (ajax, response, status) {
+      Drupal.ajax.instances[this.instanceIndex] = null;
+    };
+    ProductThumbnailAjaxObject.execute();
+  }
+
+  function ComparatorSectionBlockDisplay() {
+    // Show/hide comparator all pages block depending on elements.
+    const langCode = drupalSettings.path.pathPrefix;
+    let pathname = window.location.pathname;
+    let countComparatorElements = $("#comparator-counter").text();
+    if (countComparatorElements == "0" || pathname == '/' + langCode + 'member/login' || pathname.indexOf("/layout") >= 0 || $(".comparator-products").length) {
+      jQuery('#comparator-all-pages-block').fadeOut();
+    }
+    else {
+      jQuery('#comparator-all-pages-block').fadeIn();
+    }
+  }
+
+  $(document).ajaxComplete(function (event, xhr, settings) {
+    // Reorder cards + thumbnails.
+      reorderCards();
+      reorderThumbnails();
+
+      appendComparatorEmptyCards();
+      appendComparatorEmptyThumbnails();
+    ComparatorSectionBlockDisplay();
+    // Handling compare button link.
+    if (products.length <= 1) {
+      $('#compare-link').addClass('disabled');
+    }
+    else {
+      $('#compare-link').removeClass('disabled');
+    }
+    if (products.length >= 4) {
+      $('.compare-check').each(function() {
+        if (!$(this).prop('checked')) {
+          $(this).addClass('checked-test');
+          $(this).attr('disabled', true);
+        }
+      });
+    }
+    else {
+      $('.compare-check').attr('disabled', false);
+    }
+  });
+
+  $(document).ready(function () {
+    ComparatorSectionBlockDisplay();
+    // Comparator section block state.
+    const comparatorBlockStateCookie = jQuery.cookie('comparator_block_shrink');
+    if (comparatorBlockStateCookie == 'true') {
+      $('.comparator-footer, .btn-comparator-footer').addClass('is-shrink');
+    }
+    else if (comparatorBlockStateCookie == 'false') {
+      $('.comparator-footer, .btn-comparator-footer').removeClass('is-shrink');
+    }
+    let i;
+    for (i = 0; i < products.length; ++i) {
+      if (products[i] !== 'null') {
+        ajaxCallBack(products[i], i);
+        ajaxThumbnailCallBack(products[i], i);
+      }
+    }
+  });
+
+  function getSectionBlockProducts(){
+    if ($('#comparator-products-sections').length) {
+
+      var cookie_products = getCookie("comparator_products");
+
+      if (cookie_products !== undefined && cookie_products !== "") {
+        $.ajax({
+          url: Drupal.url("comparator-section-block-products") + '?product_ids=' + decodeURIComponent(cookie_products),
+          type: 'GET',
+          dataType: 'json',
+          success: function (response) {
+            let command = response.find(o => o.command === 'insert');
+            jQuery(command.selector).append(command.data);
+            stickyComparator();
+            appendDeleteEvent();
+            appendSliderEvent();
+            showOnlyDifferences();
+            Drupal.behaviors.addProductToProjectFromSearchResultsPage.attach();
+          }
+        });
+      }else {
+        $('#comparator-products-sections').html(`
+         <div class="container pt-lg-6">
+          <div class="d-sm-flex justify-content-between">
+            <div>
+              <h1 class="h2 font-family-medium mb-sm-1"> `+ Drupal.t('Compare Products') +` </h1>
+              <div class="h5 font-family-light mb-sm-4 mb-3"><em> `+ drupalSettings.empty_comparator +` </em></div>
+            </div>
+          </div>
+        </div>
+        `);
+      }
+    }
+
+  }
+
+  function deleteCardFormProducts() {
+    // slider comparator
+    var $sliderComparator = $('.comparator-products');
+    // slider-four-items
+    var $sliderFourItems = $('.slider-four-items');
+
+    var $classColumnComparator = 'col';
+
+    $('.comparator-products .alert').on('closed.bs.alert', function () {
+      var targetCard = $(this).data('card-target');
+      $('.table-comparator-technique').find('[data-product-id="' + targetCard + '"]').remove();
+      $sliderFourItems.slick('unslick');
+      $sliderFourItems.find('[data-product-id="' + targetCard + '"]').remove();
+      $sliderComparator.slick('unslick');
+      setTimeout(function() {
+        $sliderFourItemsLenght = $sliderFourItems.children().length;
+        $sliderFourItems.slick({
+          infinite: false,
+          // centerMode: true,
+          arrows: false,
+          adaptiveHeight: true,
+          dots: false,
+          slidesToShow: 4,
+          slidesToScroll: 4,
+          swipe: false,
+          asNavFor: '.comparator-products',
+          responsive: [
+            {
+              breakpoint: gridBreakpoints.lg,
+              settings: {
+                slidesToShow: 3,
+                slidesToScroll: 3
+              }
+            },
+            {
+              breakpoint: gridBreakpoints.md,
+              settings: {
+                slidesToShow: 2,
+                slidesToScroll: 2
+              }
+            }
+            ,
+            {
+              breakpoint: gridBreakpoints.sm,
+              settings: {
+                slidesToShow: 1,
+                slidesToScroll: 1
+              }
+            }
+            // You can unslick at a given breakpoint now by adding:
+            // settings: "unslick"
+            // instead of a settings object
+          ]
+        });
+
+        if(!hasSliderFourFiredWithMobile($sliderFourItemsLenght)) {
+          $sliderFourItems.slick('unslick');
+          $sliderFourItems.addClass('row');
+          $sliderFourItems.children().addClass('col');
+          $sliderFourItems.find('.card-row').attr('style', '');
+
+        } else {
+          $sliderFourItems.slick('init');
+          $sliderFourItems.removeClass('row');
+          $sliderFourItems.find('.col').removeClass('col');
+        }
+
+        $sliderComparatorLenght = $sliderComparator.children('.alert').length;
+
+        $sliderComparator.on('init', function(event, slick){
+            $('.table-comparator-technique').find('.comparator-value').hide();
+            slick.$slides.each(function(index, item) {
+              if($(item).hasClass('slick-active')) {
+                $('.table-comparator-technique').find('[data-product-id="' + $(item).data('card-target') + '"]').show();
+              }
+            });
+          });
+        $sliderComparator.slick({
+          infinite: false,
+          // centerMode: true,
+          arrows: false,
+          adaptiveHeight: true,
+          dots: false,
+          slidesToShow: 4,
+          slidesToScroll: 4,
+          asNavFor: '.slider-four-items',
+          responsive: [
+            {
+              breakpoint: gridBreakpoints.lg,
+              settings: {
+                slidesToShow: 3,
+                slidesToScroll: 3
+              }
+            },
+            {
+              breakpoint: gridBreakpoints.md,
+              settings: {
+                slidesToShow: 2,
+                slidesToScroll: 2
+              }
+            }
+            ,
+            {
+              breakpoint: gridBreakpoints.sm,
+              settings: {
+                slidesToShow: 1,
+                slidesToScroll: 1
+              }
+            }
+            // You can unslick at a given breakpoint now by adding:
+            // settings: "unslick"
+            // instead of a settings object
+          ]
+        }).on('setPosition', function (event, slick) {
+          if(slick.$slideTrack.height() > 0) {
+            slick.$slides.css('height', slick.$slideTrack.height() + 'px');
+          }
+        });
+        if(!hasSliderFourFiredWithMobile($sliderComparatorLenght)) {
+          $sliderComparator.slick('unslick');
+          $sliderComparator.addClass('row');
+          $sliderComparator.children().addClass($classColumnComparator);
+          $sliderComparator.find('.card-row').attr('style', '');
+          $sliderComparator.find('.alert').attr('style', '');
+          $('.table-comparator-technique').find('.comparator-value').show();
+        } else {
+          $sliderComparator.slick('init');
+          $sliderComparator.removeClass('row');
+          $sliderComparator.find('.alert').removeClass($classColumnComparator);
+        }
+      }, 50);
+    });
+  }
+
+
+  function stickyComparator() {
+    if($('.comparator').length) {
+      // get scroll top
+      var scrollTop = $(window).scrollTop();
+      var timer = 250;
+      var comparatorHeight = $('.comparator').height();
+      var scroll = $('.comparator').offset().top - comparatorHeight - $('.header-simple--top').outerHeight();
+      if($('.select-country').length) {
+        scroll -= $('.select-country').outerHeight();
+      }
+      if(scroll < 0) {
+        scroll = 20;
+      }
+
+      // var to check size window
+      var fireStickyComparator = (ww > gridBreakpoints.lg) ? true: false;
+      var adminMenuBar = 0;
+
+      // calculate height header
+      var headerHeight = $('.header-simple--mid').height();
+      if($('.header-simple--cookies').length && $('.header-simple--cookies').hasClass('show-cookies')) {
+        headerHeight += $('.header-simple--cookies.show-cookies').height();
+      }
+      if($('.header-simple--notif').length && !$('.header-simple--notif').hasClass('.hide-notif')) {
+        headerHeight += $('.header-simple--notif').height();
+      }
+
+      // calculate height admin menu
+      if($('#toolbar-administration').length) {
+        headerHeight += 39;
+        adminMenuBar += 39;
+      }
+
+      if($('#toolbar-item-administration-tray').length) {
+        headerHeight += 39;
+        adminMenuBar += 39;
+      }
+
+
+      $("#hide-notif").on('click', function () {
+        headerHeight -= $('.header-simple--notif').height();
+        stickyComparator();
+      });
+
+      $("#accept-cookies").on('click', function () {
+        headerHeight -= $('.header-simple--cookies.show-cookies').height();
+        stickyComparator();
+      });
+
+      // function to get position top on comparator
+      function stickyComparator() {
+        if(scrollTop > scroll && fireStickyComparator) { //
+          $('.comparator').addClass('is-sticky').css('top', headerHeight);
+          $('body').css('padding-top', comparatorHeight);
+        } else {
+          $('.comparator').removeClass('is-sticky').removeAttr('style');
+          $('body').css('padding-top', adminMenuBar);
+        }
+      }
+
+      // fire sticky comparator on load
+      stickyComparator();
+
+
+      // fire sticky comparator on scroll
+      $(window).on('scroll', function() {
+        scrollTop = $(window).scrollTop();
+        stickyComparator();
+      });
+
+      // fire sticky comparator on resize
+      var resizeTimer;
+      $(window).on('resize', function() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+          scrollTop = $(window).scrollTop()
+          ww = $(window).width();
+          fireStickyComparator = (ww > gridBreakpoints.lg) ? true: false;
+          stickyComparator();
+        }, timer);
+      });
+    }
+  }
+
+
+  function hasSliderFourFiredWithMobile(sliderfourItemsLenght) {
+    var fireFourSliderWithMobile;
+    if(ww < gridBreakpoints.sm && sliderfourItemsLenght > 1) {
+      fireFourSliderWithMobile = true;
+    } else if(ww < gridBreakpoints.md && ww >= gridBreakpoints.sm && sliderfourItemsLenght > 2) {
+      fireFourSliderWithMobile = true;
+    } else if(ww < gridBreakpoints.lg && ww >= gridBreakpoints.md && sliderfourItemsLenght > 3) {
+      fireFourSliderWithMobile = true;
+    } else if(ww > gridBreakpoints.lg && sliderfourItemsLenght > 4) {
+      fireFourSliderWithMobile = true;
+    } else {
+      fireFourSliderWithMobile = false;
+    }
+    return fireFourSliderWithMobile;
+  }
+
+  function sliderComparatorProducts() {
+    // slider comparator
+    var $sliderComparator = $('.comparator-products');
+
+    if($sliderComparator.length) {
+      var $classColumnComparator = 'col';
+      var $sliderComparatorLenght = $sliderComparator.children('.alert').length;
+
+      $sliderComparator.find('.alert').on('closed.bs.alert', function () {
+        var targetCard = $(this).data('card-target');
+        $('.table-comparator-technique').find('[data-product-id="' + targetCard + '"]').remove();
+        $('.slider-four-items').find('[data-product-id="' + targetCard + '"]').remove();
+
+        alertComparatorLength = $('.comparator-products .alert').length;
+        stickyComparator();
+      });
+
+      $sliderComparator.on('init', function(event, slick){
+        $('.table-comparator-technique').find('.comparator-value').hide();
+        slick.$slides.each(function(index, item) {
+          if($(item).hasClass('slick-active')) {
+            $('.table-comparator-technique').find('[data-product-id="' + $(item).data('card-target') + '"]').show();
+          }
+        });
+      });
+
+
+      $sliderComparator.slick({
+        infinite: false,
+        // centerMode: true,
+        arrows: false,
+        adaptiveHeight: true,
+        dots: false,
+        slidesToShow: 4,
+        slidesToScroll: 4,
+        asNavFor: '.slider-four-items',
+        responsive: [
+          {
+            breakpoint: gridBreakpoints.lg,
+            settings: {
+              slidesToShow: 3,
+              slidesToScroll: 3
+            }
+          },
+          {
+            breakpoint: gridBreakpoints.md,
+            settings: {
+              slidesToShow: 2,
+              slidesToScroll: 2
+            }
+          }
+          ,
+          {
+            breakpoint: gridBreakpoints.sm,
+            settings: {
+              slidesToShow: 1,
+              slidesToScroll: 1
+            }
+          }
+          // You can unslick at a given breakpoint now by adding:
+          // settings: "unslick"
+          // instead of a settings object
+        ]
+      }).on('afterChange', function (event, slick, currentSlide, nextSlide) {
+        $('.table-comparator-technique').find('.comparator-value').hide();
+        slick.$slides.each(function(index, item) {
+          if($(item).hasClass('slick-active')) {
+            $('.table-comparator-technique').find('[data-product-id="' + $(item).data('card-target') + '"]').show();
+          }
+        });
+      })
+      .on('setPosition', function (event, slick) {
+        if(slick.$slideTrack.height() > 0) {
+          slick.$slides.css('height', slick.$slideTrack.height() + 'px');
+        }
+      });
+
+
+
+      if(!hasSliderFourFiredWithMobile($sliderComparatorLenght)) {
+        $sliderComparator.slick('unslick');
+        $sliderComparator.addClass('row');
+        $sliderComparator.children().addClass($classColumnComparator);
+        $sliderComparator.find('.card-row').attr('style', '');
+        $sliderComparator.find('.alert').attr('style', '');
+        $('.table-comparator-technique').find('.comparator-value').show();
+      } else {
+        $sliderComparator.slick('init');
+        $sliderComparator.on('init', function(event, slick){
+          $('.table-comparator-technique').find('.comparator-value').hide();
+          slick.$slides.each(function(index, item) {
+            if($(item).hasClass('slick-active')) {
+              $('.table-comparator-technique').find('[data-product-id="' + $(item).data('card-target') + '"]').show();
+            }
+          });
+        });
+        $sliderComparator.removeClass('row');
+        $sliderComparator.find('.alert').removeClass($classColumnComparator);
+      }
+
+      var resizeTimerFour;
+      $(window).on('resize', function(e) {
+        clearTimeout(resizeTimerFour);
+        resizeTimerFour = setTimeout(function() {
+          ww = $(window).width();
+          hasSliderFourFiredWithMobile($sliderComparatorLenght);
+          if(!hasSliderFourFiredWithMobile($sliderComparatorLenght)) {
+            $sliderComparator.slick('unslick');
+            $sliderComparator.addClass('row');
+            $sliderComparator.children().addClass($classColumnComparator);
+            $sliderComparator.find('.card-row').attr('style', '');
+            $('.table-comparator-technique').find('.comparator-value').show();
+          } else {
+            $sliderComparator.slick('init', function(event, slick){
+              $('.table-comparator-technique').find('.comparator-value').hide();
+              slick.$slides.each(function(index, item) {
+                if($(item).hasClass('slick-active')) {
+                  $('.table-comparator-technique').find('[data-product-id="' + $(item).data('card-target') + '"]').show();
+                }
+              });
+            });
+            $sliderComparator.removeClass('row');
+            $sliderComparator.find('.alert').removeClass($classColumnComparator);
+          }
+        }, timerSLider);
+      });
+    }
+  }
+
+  function sliderFourItems() {
+
+    // slider-four-items
+    var $sliderFourItems = $('.slider-four-items');
+    if($sliderFourItems.length) {
+      var $sliderFourItemsLenght = $sliderFourItems.children().length;
+
+      $sliderFourItems.slick({
+        infinite: false,
+        // centerMode: true,
+        arrows: false,
+        adaptiveHeight: true,
+        dots: false,
+        slidesToShow: 4,
+        slidesToScroll: 4,
+        swipe: false,
+        asNavFor: '.comparator-products',
+        responsive: [
+          {
+            breakpoint: gridBreakpoints.lg,
+            settings: {
+              slidesToShow: 3,
+              slidesToScroll: 3
+            }
+          },
+          {
+            breakpoint: gridBreakpoints.md,
+            settings: {
+              slidesToShow: 2,
+              slidesToScroll: 2
+            }
+          }
+          ,
+          {
+            breakpoint: gridBreakpoints.sm,
+            settings: {
+              slidesToShow: 1,
+              slidesToScroll: 1,
+            }
+          }
+          // You can unslick at a given breakpoint now by adding:
+          // settings: "unslick"
+          // instead of a settings object
+        ]
+      });
+
+      if(!hasSliderFourFiredWithMobile($sliderFourItemsLenght)) {
+        $sliderFourItems.slick('unslick');
+        $sliderFourItems.addClass('row');
+        $sliderFourItems.children().addClass('col');
+        $sliderFourItems.find('.card-row').attr('style', '');
+      } else {
+        $sliderFourItems.slick('init');
+        $sliderFourItems.removeClass('row');
+        $sliderFourItems.find('.col').removeClass('col');
+      }
+
+      var resizeTimerFourItems;
+      $(window).on('resize', function(e) {
+        clearTimeout(resizeTimerFourItems);
+        resizeTimerFourItems = setTimeout(function() {
+          ww = $(window).width();
+          hasSliderFourFiredWithMobile($sliderFourItemsLenght);
+          if(!hasSliderFourFiredWithMobile($sliderFourItemsLenght)) {
+            $sliderFourItems.slick('unslick');
+            $sliderFourItems.addClass('row');
+            $sliderFourItems.children().addClass('col');
+            $sliderFourItems.find('.card-row').attr('style', '');
+          } else {
+            $sliderFourItems.slick('init');
+            $sliderFourItems.removeClass('row');
+            $sliderFourItems.find('.col').removeClass('col');
+          }
+        }, timerSLider);
+      });
+    }
+  }
+
+  function appendSliderEvent() {
+    sliderComparatorProducts();
+    deleteCardFormProducts();
+    sliderFourItems();
+  }
+
+  function appendDeleteEvent(){
+    jQuery(".comparator-delete").click(function() {
+      // get productId
+      let productId = $(this).closest('.card-comparator').attr('data-id');
+      deleteProductFromCookie(productId);
+      let count = $('.comparator-products .card-comparator').length;
+      $('#products-counter').text(count - 1)
+      // Delete checkbox cookie.
+      deleteCheckboxCookie('customCheck_' + productId);
+      if ((count - 1) == 0 || (count - 1) == 1) {
+        window.location.reload();
+      }
+    });
+  }
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+})(jQuery, Drupal, drupalSettings);
+;
+Drupal.behaviors.legrand_sketchfab = {
+  attach: function (context, settings) {
+
+      let  collection_height = Math.ceil(jQuery('.block-collection--body').outerHeight());
+      jQuery('.sketchfab-embed-wrapper iframe').attr('height',collection_height - 30)
+
+
+  }
+};
+
+
+
+
+
+
+
+
+;
+Drupal.behaviors.modal_video_play_stop = {
+  attach: function (context, settings) {
+
+    var videoSrc;
+    jQuery('.video-modal').each(function (i, obj) {
+      videoSrc = jQuery(this).find(".btn-player").data("src");
+      if (videoSrc) {
+        jQuery(this).find(".btn-player").attr("data-target", "#myModal-" + i);
+        jQuery(this).find(".modal-video").attr("id", "myModal-" + i);
+        jQuery(this).find(".btn-player").attr("id", "video-btn-" + i);
+        jQuery(this).find("iframe").attr("id", "ytplayer-" + i);
+      }
+    });
+
+    jQuery('.btn-player').click(function () {
+      var videoSrc = jQuery(this).data("src");
+      var target = jQuery(this).data("target");
+      jQuery(target).find("iframe").attr('src', videoSrc + "?autoplay=1&amp;modestbranding=1&amp;showinfo=0");
+
+      jQuery('.youtube-video').each(function () {
+        jQuery(this)[0].contentWindow.postMessage('{"event":"command","func":"' + 'stopVideo' + '","args":""}', '*');
+      });
+    });
+
+    jQuery('.modal-video').on('hide.bs.modal', function (e) {
+      jQuery(this).find("iframe").attr('src', '');
+    });
+
+  }
+};;
+(function ($, Drupal, drupalSettings) {
+  /* Download documents in search page*/
+  Drupal.behaviors.downloadDocuments = {
+    attach: function (context, settings) {
+      // Generate URL for routing.
+
+      $('.search-download-document', context).on('click', function (e) {
+        e.preventDefault();
+        const current_link = $(this)
+        const href = current_link.attr('data-href');
+        const loader = $('<div id="loader-doc"></div>');
+        $('.layout-content').append(loader);
+
+        $.ajax({
+          url: window.location.origin + '/' + href,
+          type: 'GET',
+          beforeSend: function () {
+            $('.search-download-document').each(function () {
+              $(this).on('click', function () {
+                $(this).addClass('disabled');
+              });
+            });
+          },
+          success: function (response) {
+            const a = document.createElement("a");
+            a.href = window.location.origin + '/' + href;
+            a.target = '_blank';
+            a.click(); //Downloaded file
+            $("#loader-doc").remove(); //Remove Loader
+            current_link.removeClass('disabled');
+          },
+          error: function (xhr) {
+            current_link.removeClass('disabled');
+            $("#loader-doc").remove();
+          }
+        });
+
+      });
+    }
+  };
+})(jQuery, Drupal, drupalSettings);
+;

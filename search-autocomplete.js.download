@@ -1,0 +1,408 @@
+(function ($, Drupal, drupalSettings) {
+
+  let ww = $(window).width();
+  let resultSearch = $('.searchComponent');
+  let searchComponentTracker = $('.searchComponent--tracker');
+  let inputSearch = $('#js-site-search-input');
+  let formSearch = $('#search-header-form');
+  let searchBox = $('.header-search-box');
+  ww = $(window).width();
+  let wh = $(window).height();
+  let headerHeight = $('.header-simple').outerHeight(true);
+
+  let gridBreakpoints = {
+    xs: 0,
+    sm: 768,
+    md: 1024,
+    lg: 1280,
+    xl: 1600
+  };
+
+  let initialized;
+
+  Drupal.behaviors.searchAutocomplete = {
+    attach: function (context, settings) {
+      if(inputSearch.length) {
+        searchAutocomplete(context);
+      }
+    }
+  }
+
+  function svg() {
+    let svgImg = $('img.img-svg');
+    svgImg.each(function () {
+      var $img = jQuery(this);
+      var imgID = $img.attr('id');
+      var imgClass = $img.attr('class');
+      var imgURL = $img.attr('src');
+      var imgWidth = $img.attr('width');
+      var imgHeight = $img.attr('height');
+      $.get(imgURL, function (data) {
+        // Get the SVG tag, ignore the rest
+        var $svg = jQuery(data).find('svg');
+
+        // Add replaced image's ID to the new SVG
+        if (imgID !== undefined) {
+          $svg = $svg.attr('id', imgID);
+        }
+        // Add replaced image's classes to the new SVG
+        if (imgClass !== undefined) {
+          $svg = $svg.attr('class', imgClass + ' replaced-svg');
+        }
+        if (imgWidth !== undefined) {
+          $svg = $svg.attr('width', imgWidth);
+        }
+        if (imgHeight !== undefined) {
+          $svg = $svg.attr('height', imgHeight);
+        }
+        $svg = $svg.removeAttr('xmlns:a');
+        $img.replaceWith($svg);
+      }, 'xml');
+    });
+  }
+
+  function searchHeight() {
+    var inputSearchWidth = formSearch.outerWidth(true);
+    var inputSearchHeight = formSearch.outerHeight(true);
+    headerHeight = $('.header-simple--top').outerHeight(true) + $('.header-simple--mid').outerHeight(true);
+    var resultSearchHeight = $('.searchComponent--body').outerHeight(true);
+    wh = $(window).height();
+    ww = $(window).width();
+
+    if($('.select-country').length && $('.select-country').is(':visible')) {
+      headerHeight += $('.select-country').outerHeight(true);
+    }
+
+    // calculate height admin menu
+    if ($('#toolbar-administration').length) {
+      headerHeight += (ww > 975) ? ($('#toolbar-bar').outerHeight(true) + $('#toolbar-item-administration-tray').outerHeight(true)) : $('#toolbar-bar').outerHeight(true);
+    }
+    var topSearch;
+    var leftSearch = $('.header-search-input-wp').offset().left;
+    // var resultSearchHeight;
+    var rt = ww - (leftSearch + inputSearchWidth);
+
+    if (ww >= gridBreakpoints.md) {
+      // resultSearchHeight = wh - headerHeight + 10;
+      topSearch = headerHeight - 12;
+    } else {
+      // resultSearchHeight = wh - headerHeight - inputSearchHeight + 5;
+      topSearch = $('.header-simple--mid').outerHeight(true) + inputSearchHeight +  - 6;
+      if ($('#toolbar-administration').length) {
+        topSearch += $('#toolbar-bar').outerHeight(true);
+      }
+    }
+    var css;
+    resultSearch.attr('style', '');
+    if(wh < resultSearchHeight + headerHeight) {
+      css = {'top': topSearch, 'overflow-y': 'scroll', 'height': 'calc(100vh - '+(topSearch)+'px)'};
+    } else {
+      css = {'top': topSearch, 'height': 'calc(100vh - '+(topSearch)+'px)'};
+    }
+    if (ww < 767) {
+      css = {'top': '130px', 'height': 'calc(100vh - 130px)'};
+    }
+    searchComponentTracker.css('right', rt);
+    resultSearch.css(css);
+  }
+
+  function suggestedProductsAjax($keywords) {
+    if ($keywords) {
+      let loader = $('<div class="loader-suggestion"></div>');
+      $('#suggestion-products').append(loader);
+      $.ajax({
+        url: drupalSettings.path.baseUrl + drupalSettings.path.pathPrefix + "call/ajax/suggested/products/" + $keywords,
+        dataType: "json",
+        success: function (res) {
+            $("#suggestion-products").html(res.html);
+            // Generate search page url
+            if ($("#all-products-search-link").length) {
+              var urlSearchPage = $("#all-products-search-link").attr("href");
+              urlSearchPage = urlSearchPage.split('?')[0];
+              $("#all-products-search-link").attr("href", urlSearchPage + "?search=" + $('#js-site-search-input').val())
+            }
+            // get Count items
+            if (res.count == 1) {
+              $('#all-products-search-col').addClass('col-sm-4');
+            }
+            if (res.count == 2) {
+              $('#all-products-search-col').addClass('col-sm-8');
+              $('#all-products-search-bg').find('.row  .col-12').addClass('col-sm-6');
+            }
+            if (res.count > 2) {
+              $('#all-products-search-bg').addClass('bg-outside-right');
+              $('#all-products-search-bg').find('.row  .col-12').addClass('col-sm-4');
+            }
+            searchHeight();
+          if (window.a2a) {
+            a2a.init_all(); // Init all uninitiated AddToAny instances
+            svg();
+            $("[id^=sugg-prod-").on('click', function () {
+              $("[class^=a2a_button_").on('click', function () {
+                $(".close").trigger('click');
+              });
+            });
+          }
+        },
+        complete: function () {
+          closeSearchBar();
+          $(".loader-suggestion").remove(); //Remove Loader
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+          console.log(xhr.status);
+          console.log(thrownError);
+        }
+      });
+    }
+  }
+
+  function suggestedDocumentsAjax($keywords) {
+    if ($keywords) {
+      /*let loader = $('<div class="loader-suggestion"></div>');
+      $('#suggestion-documents').append(loader);*/
+      $.ajax({
+        url: drupalSettings.path.baseUrl + drupalSettings.path.pathPrefix + "call/ajax/suggested/documents/" + $keywords,
+        dataType: "json",
+        success: function (response) {
+          if (response[0].data !== undefined && response[0].selector == "#suggestion-documents") {
+            $('#suggestion-documents').replaceWith(response[0].data);
+          }
+          else if (response[1].data !== undefined && response[1].selector == "#suggestion-documents") {
+            $('#suggestion-documents').replaceWith(response[1].data);
+          }
+          else if (response[2].data !== undefined && response[2].selector == "#suggestion-documents") {
+            $('#suggestion-documents').replaceWith(response[2].data);
+          }
+          else if (response[3].data !== undefined && response[3].selector == "#suggestion-documents") {
+            $('#suggestion-documents').replaceWith(response[3].data);
+          }
+          if (window.a2a) {
+            a2a.init_all(); // Init all uninitiated AddToAny instances
+            svg();
+          }
+          if($("#all-documents-search-link").length) {
+            var urlSearchDocuments = $("#all-documents-search-link").attr("href");
+            urlSearchDocuments = urlSearchDocuments.split('?')[0];
+            $("#all-documents-search-link").attr("href", urlSearchDocuments + "?search=" + $('#js-site-search-input').val() + "&current_tab=tab-B");
+          }
+          searchHeight();
+          Drupal.attachBehaviors()
+        },
+        /*complete: function () {
+          closeSearchBar();
+          // $(".loader-suggestion").remove(); //Remove Loader
+        },*/
+        error: function (xhr, ajaxOptions, thrownError) {
+          console.log(xhr.status);
+          console.log(thrownError);
+        }
+      });
+    }
+  }
+  function suggestedWebpagesAjax($keywords) {
+    if ($keywords) {
+      /*let loader = $('<div class="loader-suggestion"></div>');
+      $('#suggestion-webpages').append(loader);*/
+      $.ajax({
+        url: drupalSettings.path.baseUrl + drupalSettings.path.pathPrefix + "call/ajax/suggested/webpages/" + $keywords,
+        dataType: "json",
+        success: function (response) {
+          $("#suggestion-webpages").html(response.html);
+          // get Count items
+          if (response.count_faq === 0 ) {
+            $('#all-faq-search-link, #webpages-faq-diviser').css('display', 'none');
+          }
+          if($("#all-webpages-search-link").length) {
+            var urlSearchWebpage = $("#all-webpages-search-link").attr("href");
+            urlSearchWebpage = urlSearchWebpage.split('?')[0];
+            $("#all-webpages-search-link").attr("href", urlSearchWebpage + "?search=" + $('#js-site-search-input').val() + "&current_tab=tab-D");
+          }
+
+          if($("#all-faq-search-link").length) {
+            var urlSearchFaq = $("#all-faq-search-link").attr("href");
+            urlSearchFaq = urlSearchFaq.split('?')[0];
+            $("#all-faq-search-link").attr("href", urlSearchFaq + "?search=" + $('#js-site-search-input').val() + "&current_tab=tab-C");
+          }
+          searchHeight();
+        },
+        complete: function () {
+          closeSearchBar();
+          // $(".loader-suggestion").remove(); //Remove Loader
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+          console.log(xhr.status);
+          console.log(thrownError);
+        }
+      });
+    }
+  }
+  var closeBtnFalg = false;
+  function closeSearchBar() {
+    if(!closeBtnFalg) {
+      closeBtnFalg = true;
+      $(".js-search-close").on('click', function () {
+        searchBox.removeClass('is-active');
+        resultSearch.removeClass('is-active');
+        $(".header-simple").removeClass('expanded search-expanded header-shrunk');
+        $('.header-logo--wp').removeClass('shrunk');
+        $('body').removeClass('overflow-hidden');
+        inputSearch.val('');
+        inputSearch.blur();
+      });
+    }
+  }
+  function searchAutocomplete(context) {
+    if (!initialized) {
+      initialized = true;
+
+      $(".js-header-icon-search").on('click', function () {
+        $('.panier').removeClass('active');
+        $(".header-simple").removeClass('expanded');
+        $(".hamburger").removeClass("is-active");
+        searchBox.addClass('is-active');
+        if(ww <= gridBreakpoints.md) {
+          $('.header-logo--wp').addClass('shrunk');
+        }
+        inputSearch.focus();
+      });
+      inputSearch.on('focus', function() {
+        searchBox.addClass('is-active');
+      });
+      // close search box on click out
+      $(document).click(function(event) {
+        var $target = $(event.target);
+        if(!$target.closest('.header-search-box').length && searchBox.hasClass('is-active')) {
+          searchBox.removeClass('is-active');
+          resultSearch.removeClass('is-active');
+          $(".header-simple").removeClass('expanded search-expanded header-shrunk');
+          $('.header-logo--wp').removeClass('shrunk');
+          $('body').removeClass('overflow-hidden');
+          inputSearch.val('');
+          inputSearch.blur();
+        }
+      });
+
+
+
+      // submit form if length input greater than 2 words
+      $('#search-header-form .submit-search').on('click', function(e) {
+        var lengthSearch = inputSearch.val().length;
+        if(lengthSearch < 3) {
+          e.preventDefault();
+          return false;
+        }
+      });
+
+      closeSearchBar();
+
+      if ($(window).width() < 765) {
+        $('#suggestion-modal-bg').on('click', function (e) {
+          e.stopPropagation();
+          $('.js-search-close').trigger('click');
+
+        });
+      }
+
+      $(window).on('resize', function (e) {
+        searchHeight();
+      });
+
+      // Prevent search form submit when clicking enter
+
+      $('.search-header-form #js-site-search-input').on('keydown', function (event) {
+        if ($(this).val().length < 3) {
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            return false;
+          }
+        }
+      });
+
+
+      // Trigger search suggestions on keyup event
+      $('.search-header-form #js-site-search-input').on("keyup", delay(suggestionsTrigger, 500));
+      // Trigger search suggestions on paste event
+      $('.search-header-form #js-site-search-input').on("paste", delay(suggestionsTrigger, 500));
+
+      function suggestionsTrigger(e) {
+        if(e.type === 'keyup') {
+          let keycodeSearch = [
+            8, 32, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+            65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77,
+            78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
+            96, 97, 98, 99, 100, 101, 102, 103, 104, 105
+          ];
+
+          if ($.inArray(e.keyCode, keycodeSearch) < 0) {
+            return;
+          }
+        }
+
+        if($('#js-site-search-input').val().length > 1) {
+          $('body').addClass('overflow-hidden');
+          resultSearch.addClass('is-active');
+          searchHeight();
+          let search_url = location.origin + '/' + drupalSettings.path.pathPrefix + 'ecat-search/autocomplete/acquia_search?q=' + $('#js-site-search-input').val()
+          const projectAjaxObject = Drupal.ajax({
+            url: search_url,
+          });
+
+
+            projectAjaxObject.commands.insert = function (ajax, response, status) {
+              $('#suggestion-modal').replaceWith(response.data);
+
+              // check the suggestion products block exsit while ecat enabled
+              if($("#suggestion-products").length) {
+                // Get all the suggestions
+                $("#suggestion-products #container-products, #suggestion-webpages #container-webpages, #suggestion-documents #container-documents").empty();
+                $("#all-products-search-link, #webpages-links, #all-documents-search-link").remove();
+                let no_results_string = Drupal.t("No results found");
+                $("#suggestion-products #container-products, #suggestion-webpages #container-webpages, #suggestion-documents #container-documents").append('<h3 class="h6 ml-2">'+ no_results_string +'</h3>');
+                $("#suggestion-products").css('min-height', '0');
+              }
+              let keywords = '';
+              keywords = $("#js-site-search-input").val();
+              // Inject products block
+              if (ww >= gridBreakpoints.sm) {
+                if (keywords !== '') {
+                  setTimeout(function () {
+                    // check the suggestion products block exsit while ecat
+                    // enabled
+                    if ($("#suggestion-products").length) {
+                      suggestedProductsAjax(keywords);
+                    }
+                    setTimeout(() => {
+                      suggestedDocumentsAjax(keywords);
+                    }, 600);
+                    suggestedWebpagesAjax(keywords);
+                  }, 300);
+                }
+              }
+            };
+
+            projectAjaxObject.commands.destroyObject = function (ajax, response, status) {
+              Drupal.ajax.instances[this.instanceIndex] = null;
+            };
+            projectAjaxObject.execute();
+
+        }
+        else {
+          resultSearch.removeClass('is-active');
+          $('body').removeClass('overflow-hidden');
+        }
+      }
+
+      function delay(callback, ms) {
+        var timer = 0;
+        return function() {
+          let input = this,args = arguments;
+          clearTimeout(timer);
+          timer = setTimeout(function () {
+            callback.apply(input, args);
+          }, ms || 0);
+        };
+      }
+    }
+  }
+
+})(jQuery, Drupal, drupalSettings);

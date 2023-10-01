@@ -1,0 +1,293 @@
+/**
+ * Views exposed filter autosubmit js for Drupal 8.
+ */
+
+(function ($, drupalSettings) {
+
+  Drupal.behaviors.legrand_ecat_share = {
+    attach: function (context) {
+
+      var isDefaultMenuOpen = $('.first-level.header-mega-menu-item.is-default');
+      if (isDefaultMenuOpen.length > 0) {
+        // firstLevelNodes.removeClass("active");
+        // $(this).addClass("active");
+        var $navTracker = $('.js-nav-tracker'),
+          positionX = isDefaultMenuOpen.offset().left + (isDefaultMenuOpen.width() / 2) - ($navTracker.width() / 2);
+        $navTracker.css('left', positionX).addClass('active');
+        var headerHeight = $('.header-simple').outerHeight(true);
+        var windowHeight = $(window).height();
+        var megaMenuHeight = isDefaultMenuOpen.find('.header-mega-menu-desktop').outerHeight(true);
+        var megaMenuHeightCalculated = windowHeight - headerHeight;
+        if(windowHeight < megaMenuHeight + headerHeight) {
+          isDefaultMenuOpen.find('.header-mega-menu-desktop').css({
+            'max-height': megaMenuHeightCalculated,
+            'overflow-y': 'scroll'
+          });
+        }
+      }
+      if (window.location.hash === '#documentation-section'){
+        scrollToID('documentation-section',1000)
+      }
+      // scrollToID function
+      function scrollToID(id, speed) {
+        var offSet = $('.header-logo--wp').height() * 2;
+        var obj = $('#' + id);
+        if (obj.length) {
+          var offs = obj.offset();
+          var targetOffset = offs.top - offSet;
+          $('html,body').animate({scrollTop: targetOffset}, speed);
+        }
+      }
+
+      $("#TECHNICAL-DOCUMENTATION input[type=checkbox]").change(function(){
+        var a = $("#TECHNICAL-DOCUMENTATION input[type=checkbox]");
+        if(a.filter(":checked").length === 0){
+          $('.add-documents-to-project.apply-disable').addClass("disabled").attr("tabindex", "-1");
+          $('#download-pdf').addClass("disabled").attr("tabindex", "-1");
+          $('#shareDoc').addClass("disabled").attr("tabindex", "-1");
+        }
+      });
+
+      $('#shareDoc', context).click(function (e) {
+        e.preventDefault();
+        // Loop checkboxes and get documents links for checked ones.
+        var checkedDocuments = "";
+        var i = 0;
+        $('input[name="documentSelect"]', context).each(function () {
+          if ($(this).prop('checked')) {
+            checkedDocuments += $(this).parent().attr("data-href") + "\n";
+            i = i + 1;
+          }
+        });
+        let titleDoc = ((i>1) ? Drupal.t("Document")+"s:" : Drupal.t("Document")+":");
+
+        $(("[class^='a2a_button_']")).on('click', function() {
+          $('input[type="checkbox"]').prop("checked", false);
+        });
+
+        if (i > 1) {
+          $("#share_modal_prod", context).css('display', 'none');
+          $("#share-modal-data", context).css('display', 'flex');
+          $("#share-modal-data", context).attr("data-a2a-url", checkedDocuments);
+          $("#share-modal-data", context).attr("data-a2a-title", titleDoc);
+        } else {
+          $("#share_modal_prod", context).css('display', 'flex');
+          $("#share-modal-data", context).css('display', 'none');
+          $("#share_modal_prod", context).attr("data-a2a-url", checkedDocuments);
+          $("#share_modal_prod", context).attr("data-a2a-title", titleDoc);
+          $("#share-teams", context).click(function () {
+            $(this).attr("href", "https://teams.microsoft.com/share?href=" + checkedDocuments);
+            $(this).parent(".teams-share-button").data("href", checkedDocuments);
+            window.open(
+              'https://teams.microsoft.com/share?href=' + checkedDocuments,
+              'ms-teams-share-popup',
+              'width=700,height=600');
+            return false;
+          });
+          $("#share_modal_prod", context).find("[class^=a2a_button_").click(function () {
+            $('.add-documents-to-project.apply-disable').addClass("disabled").attr("tabindex", "-1");
+            $('#download-pdf').addClass("disabled").attr("tabindex", "-1");
+            $('#shareDoc').addClass("disabled").attr("tabindex", "-1");
+            $("#TECHNICAL-DOCUMENTATION input[type=checkbox]").prop('checked', false);
+          });
+        }
+        $("[id^=share-sugg-doc-", context).find("[class^=a2a_button_").click(function () {
+          if (!$(e.target).is($(this).find(".close"))) {
+            $(".close").trigger('click');
+          }
+        });
+      //  checkedDocuments = "";
+        $('#share-modal .close').trigger('click');
+      });
+      $('#shareProd',context).on("click",function (e) {
+        //const productId = $(this).attr("data-product-id");
+        const linkProduct = window.location.href;
+        const titleProduct = $(document).attr('title');
+
+        $("#share_modal_prod", context).attr("data-a2a-url", linkProduct);
+        $("#share_modal_prod", context).attr("data-a2a-title", titleProduct);
+        $("#share_modal_prod", context).css('display', 'flex');
+        $("#share-modal-data", context).css('display', 'none')
+        $("#share-teams", context).click(function () {
+          $(this).attr("href", "https://teams.microsoft.com/share?href=" + linkProduct);
+          $(this).parent(".teams-share-button").data("href", linkProduct);
+          window.open(
+            'https://teams.microsoft.com/share?href=' + linkProduct,
+            'ms-teams-share-popup',
+            'width=700,height=600');
+          return false;
+        });
+        $('input[type="checkbox"]').prop("checked", false);
+        $('#share-modal .close').trigger('click');
+      });
+
+      $("[id^=share-modal-", context).find("[class^=a2a_button_").click(function (e) {
+        $('.add-documents-to-project.apply-disable').addClass("disabled").attr("tabindex", "-1");
+        $('#download-pdf').addClass("disabled").attr("tabindex", "-1");
+        $('#shareDoc').addClass("disabled").attr("tabindex", "-1");
+        if (!$(e.target).is($(this).find(".close"))) {
+          $(".close").trigger('click');
+          $("#TECHNICAL-DOCUMENTATION input[type=checkbox]").prop('checked', false);
+        }
+      });
+      $("[id^=share-sugg-doc-", context).find("[class^=a2a_button_").click(function (e) {
+        if (!$(e.target).is($(this).find(".close"))) {
+          $(".close").trigger('click');
+        }
+      });
+      $("[id^=share-modal-csv", context).find("[class^=a2a_button_").click(function (e) {
+        if (!$(e.target).is($(this).find(".close"))) {
+          $(".close").trigger('click');
+        }
+      });
+      $('.share-product-list', context).click(function (e) {
+        let product_url = $(this).data("url-ptoduct");
+        $(".teams-share-button", context).attr("data-href", $(this).data("url-ptoduct"));
+        $("#share_modal_prod", context).attr("data-a2a-url", $(this).data("url-ptoduct"));
+        $("#share_modal_prod", context).attr("data-a2a-title", $(this).data("title-product"));
+        $("#share_modal_prod", context).css('display', 'flex');
+        $("#share-modal-data", context).css('display', 'none');
+        $("#share-teams", context).click(function () {
+          $(this).attr("href", "https://teams.microsoft.com/share?href="+product_url);
+          $(this).parent(".teams-share-button").data("href", product_url);
+          window.open(
+            'https://teams.microsoft.com/share?href=' + product_url,
+            'ms-teams-share-popup',
+            'width=700,height=600');
+          return false;
+        });
+        $('#share-modal .close').trigger('click');
+        $('input[type="checkbox"]').prop("checked", false);
+
+      });
+      /*$('#share-teams', context).click(function (e) {
+        e.preventDefault();
+        let arrayVal = [];
+        $('input[name="documentSelect"]', context).each(function () {
+          if ($(this).prop('checked')) {
+            arrayVal.push($(this).parent().attr("data-href"))
+          }
+        });
+        if (arrayVal.length > 0) {
+          window.open('https://teams.microsoft.com/share?href=' + arrayVal.join(' '),
+            'ms-teams-share-popup',
+            'width=700,height=600');
+        } else {
+          window.open('https://teams.microsoft.com/share?href=' + window.location.href,
+            'ms-teams-share-popup',
+            'width=700,height=600');
+        }
+        $('#share-modal .close').trigger('click')
+      });*/
+
+      $('#shareProducts', context).click(function (e) {
+        e.preventDefault();
+        // Loop checkboxes and get products links for checked ones.
+        var checkedProducts = "";
+        var i = 0;
+        $('input[name="productSelected"]', context).each(function () {
+          if ($(this).prop('checked')) {
+            checkedProducts += $(this).parents('.product-row').find(".card-product").attr("data-href") + "\n";
+            i = i + 1;
+          }
+        });
+        let title_products = ((i>1) ? Drupal.t("Product")+"s:" : Drupal.t("Product")+":");
+        if (i > 1) {
+          $('.checked-products',context).addClass('d-none');
+          $("#share_modal_prod", context).css('display', 'none');
+          $("#share-modal-data", context).css('display', 'flex');
+          $("#share-modal-data", context).attr("data-a2a-url", checkedProducts);
+          $("#share-modal-data", context).attr("data-a2a-title", title_products);
+        }else {
+          $("#share_modal_prod", context).attr("data-a2a-url", checkedProducts);
+          $("#share_modal_prod", context).attr("data-a2a-title", title_products);
+          $("#share_modal_prod", context).css('display', 'flex');
+          $("#share-modal-data", context).css('display', 'none');
+          $("#share-teams", context).click(function () {
+            $(this).attr("href", "https://teams.microsoft.com/share?href="+checkedProducts);
+            $(this).parent(".teams-share-button").data("href", checkedProducts);
+            window.open(
+              'https://teams.microsoft.com/share?href=' + checkedProducts,
+              'ms-teams-share-popup',
+              'width=700,height=600');
+            return false;
+          });
+          $('#share-modal .close').trigger('click')
+        }
+        $(("[class^='a2a_button_']")).on('click', function(){
+          $('input[type="checkbox"]').prop("checked", false);
+        });
+      })
+
+      $('.social-modal a').click(function () {
+        setTimeout(function () {
+          $('#share-modal .close').trigger('click')
+        }, 500)
+      })
+
+      function navScroll() {
+        var ww = $(window).width();
+        if($('.nav-scroll .nav-link').length) {
+          $('.nav-scroll .nav-link').first().addClass('active');
+        }
+
+        $('.nav-scroll').on('click', '.nav-link[href^="#"]', function(e) {
+          var $headerHeight = $('header').outerHeight(true);
+          // calculate height admin menu
+          if($('#toolbar-administration').length) {
+            $headerHeight += 39;
+          }
+          if($('#toolbar-item-administration-tray').hasClass('is-active') && ww > 975) {
+            $headerHeight += 39;
+          }
+          if($(this).attr("href") != '#') {
+            e.preventDefault();
+            $("html, body").animate({
+              scrollTop: $($(this).attr("href")).offset().top - ($headerHeight)
+            }, 1000);
+          }
+        });
+
+        if(window.location.href.indexOf(drupalSettings.legrand_ecat.search_page_url) < 0) {
+          localStorage.removeItem('navProductTabSearchId');
+        }
+
+        if($('.nav-scrollable-mobile').length) {
+
+          var navScrollableViewportTop = $('.nav-scrollable-viewport').offset().top;
+
+          $('#js-show-filter-result-page').on('click', function () {
+            $('.nav-scrollable-mobile').removeClass('is-scroll');
+            setTimeout(function() {
+              navScrollableViewportTop = $('.nav-scrollable-viewport').offset().top;
+            }, 500);
+          });
+
+          var navScrollableViewportHeight = $('.nav-scrollable-viewport').outerHeight(true);
+          var wh = $(window).height();
+          $(window).on('scroll', function() {
+            var scrollTop = $(window).scrollTop();
+            if(scrollTop > navScrollableViewportTop && wh + scrollTop < navScrollableViewportTop + navScrollableViewportHeight) {
+              $('.nav-scrollable-mobile').addClass('is-scroll');
+            } else {
+              $('.nav-scrollable-mobile').removeClass('is-scroll');
+            }
+          });
+        }
+
+      }
+      navScroll();
+
+    }
+  }
+
+  $('.page-root-ecat .faq-accordion .panel a').on('click', function () {
+    if ($(this).hasClass('collapsed')) {
+      $(this).addClass('accordion-open');
+    } else {
+      $(this).removeClass('accordion-open');
+    }
+  });
+
+}(jQuery, drupalSettings));
+;
